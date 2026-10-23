@@ -41,16 +41,17 @@ if (isset($_GET['search']) && $_GET['search'] === '1') {
     try {
         if (isset($_SESSION['user_id'])) {
             $db = new PluginDatabase('syslog-viewer');
-            $pdo = $db->getPdo();
             $table = $db->getTableName('search_history');
-            $stmt = $pdo->prepare("INSERT INTO `{$table}` (user_id, search_file, host_filter, keyword, results_count) VALUES (?, ?, ?, ?, ?)");
-            $stmt->execute([
-                $_SESSION['user_id'],
-                $selectedFile,
-                $selectedHost,
-                $selectedKeyword,
-                count($searchResults['results'] ?? [])
-            ]);
+            $db->query(
+                "INSERT INTO `{$table}` (user_id, search_file, host_filter, keyword, results_count) VALUES (?, ?, ?, ?, ?)",
+                [
+                    $_SESSION['user_id'],
+                    $selectedFile,
+                    $selectedHost,
+                    $selectedKeyword,
+                    count($searchResults['results'] ?? [])
+                ]
+            );
         }
     } catch (Exception $e) {
         // Silently skip if DB not initialized

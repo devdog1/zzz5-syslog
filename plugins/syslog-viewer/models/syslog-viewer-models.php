@@ -31,15 +31,15 @@ function syslog_viewer_sanitize_path($filename) {
 
     $fullPath = $baseDir . $filename;
 
-    // If target file exists in user-defined directory, return it immediately
-    if (file_exists($fullPath)) {
+    // If target file exists and is a regular file, return it immediately
+    if (is_file($fullPath)) {
         return $fullPath;
     }
 
     // Fallback: If configured dir doesn't exist or file isn't there, check /var/log/syslog/ or /var/log/
     $fallbacks = ['/var/log/syslog/' . $filename, '/var/log/' . $filename];
     foreach ($fallbacks as $fallback) {
-        if (file_exists($fallback)) {
+        if (is_file($fallback)) {
             return $fallback;
         }
     }
@@ -130,12 +130,12 @@ function syslog_viewer_format_bytes($bytes, $precision = 2) {
  * using backwards seek chunking.
  */
 function syslog_viewer_tail($filePath, $lineCount = 300) {
-    if (!file_exists($filePath) || !is_readable($filePath)) {
+    if (empty($filePath) || !is_file($filePath) || !is_readable($filePath)) {
         return [
             'lines'     => [],
             'offset'    => 0,
             'file_size' => 0,
-            'error'     => 'File does not exist or is not readable.'
+            'error'     => 'File does not exist or is not a readable regular file.'
         ];
     }
 
@@ -209,13 +209,13 @@ function syslog_viewer_tail($filePath, $lineCount = 300) {
  * Polls new lines written to log file since previous byte offset.
  */
 function syslog_viewer_read_new_lines($filePath, $lastOffset) {
-    if (!file_exists($filePath) || !is_readable($filePath)) {
+    if (empty($filePath) || !is_file($filePath) || !is_readable($filePath)) {
         return [
             'lines'     => [],
             'new_offset'=> 0,
             'file_size' => 0,
             'rotated'   => false,
-            'error'     => 'File does not exist or is not readable.'
+            'error'     => 'File does not exist or is not a readable regular file.'
         ];
     }
 
@@ -358,6 +358,10 @@ function syslog_viewer_detect_severity($message) {
  * Extracts list of unique hostnames from recent syslog entries.
  */
 function syslog_viewer_get_hosts($filePath, $scanLines = 1000) {
+    if (empty($filePath) || !is_file($filePath) || !is_readable($filePath)) {
+        return [];
+    }
+
     $tailResult = syslog_viewer_tail($filePath, $scanLines);
     $hosts = [];
 
@@ -386,11 +390,11 @@ function syslog_viewer_search_log($filePath, array $options = []) {
     $severityFilter = !empty($options['severity']) ? strtolower(trim($options['severity'])) : null;
     $limit        = !empty($options['limit']) ? intval($options['limit']) : 500;
 
-    if (!file_exists($filePath) || !is_readable($filePath)) {
+    if (empty($filePath) || !is_file($filePath) || !is_readable($filePath)) {
         return [
             'results' => [],
             'total_matches' => 0,
-            'error' => 'Selected log file does not exist or is unreadable.'
+            'error' => 'Selected log file does not exist or is not a readable regular file.'
         ];
     }
 
