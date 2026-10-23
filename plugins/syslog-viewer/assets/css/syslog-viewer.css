@@ -1,0 +1,167 @@
+/* Syslog Viewer Stylesheet */
+
+.syslog-card {
+    background: #1e1e2d;
+    color: #e1e1e6;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    border: 1px solid #2d2d3f;
+}
+
+.syslog-card-header {
+    background: #252538;
+    border-bottom: 1px solid #323248;
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+.syslog-table-container {
+    max-height: 70vh;
+    overflow-y: auto;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+    font-size: 0.85rem;
+    background: #151521;
+}
+
+.syslog-table {
+    width: 100%;
+    margin-bottom: 0;
+    color: #dcdcdc;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.syslog-table th {
+    position: sticky;
+    top: 0;
+    background: #1b1b28;
+    color: #9899ac;
+    text-transform: uppercase;
+    font-size: 0.72rem;
+    letter-spacing: 0.8px;
+    padding: 10px 14px;
+    border-bottom: 2px solid #2b2b40;
+    z-index: 2;
+}
+
+.syslog-table td {
+    padding: 8px 14px;
+    border-bottom: 1px solid #222232;
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.syslog-table td.syslog-msg-col {
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-width: 600px;
+}
+
+.syslog-row:hover {
+    background-color: #202032 !important;
+}
+
+/* Severity Badges */
+.severity-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.severity-emergency, .severity-fatal, .severity-panic {
+    background-color: #f8285a;
+    color: #ffffff;
+}
+
+.severity-critical {
+    background-color: #d9214e;
+    color: #ffffff;
+}
+
+.severity-error {
+    background-color: #f1416c;
+    color: #ffffff;
+}
+
+.severity-warning {
+    background-color: #ffc700;
+    color: #181c32;
+}
+
+.severity-notice {
+    background-color: #009ef7;
+    color: #ffffff;
+}
+
+.severity-info {
+    background-color: #7239ea;
+    color: #ffffff;
+}
+
+.severity-debug {
+    background-color: #47be7d;
+    color: #ffffff;
+}
+
+/* Host Pills */
+.host-pill {
+    background: #2b2b40;
+    color: #50cd89;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    border: 1px solid #363654;
+}
+
+/* Process Badge */
+.process-badge {
+    color: #009ef7;
+    font-weight: 500;
+}
+
+/* Control Bar */
+.syslog-controls {
+    background: #1b1b28;
+    padding: 12px 20px;
+    border-bottom: 1px solid #2b2b40;
+}
+
+.syslog-status-dot {
+    height: 10px;
+    width: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 6px;
+}
+
+.syslog-status-dot.active {
+    background-color: #50cd89;
+    box-shadow: 0 0 8px #50cd89;
+    animation: pulse-dot 1.8s infinite;
+}
+
+.syslog-status-dot.paused {
+    background-color: #ffc700;
+}
+
+@keyframes pulse-dot {
+    0% { opacity: 1; }
+    50% { opacity: 0.4; }
+    100% { opacity: 1; }
+}
+
+.search-highlight {
+    background-color: #ffe600;
+    color: #000;
+    padding: 1px 3px;
+    border-radius: 2px;
+}

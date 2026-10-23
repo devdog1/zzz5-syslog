@@ -1,0 +1,21 @@
+{
+  "Syslog Live Viewer": "Syslog Live Viewer",
+  "Syslog Search": "Syslog Search",
+  "Syslog Settings": "Syslog Settings",
+  "Select Syslog File": "Select Syslog File",
+  "Filter by Host": "Filter by Host",
+  "All Hosts": "All Hosts",
+  "Pause Auto-Refresh": "Pause Auto-Refresh",
+  "Resume Auto-Refresh": "Resume Auto-Refresh",
+  "Lines to Tailing": "Lines to Tailing",
+  "Timestamp": "Timestamp",
+  "Host": "Host",
+  "Process": "Process",
+  "Severity": "Severity",
+  "Message": "Message",
+  "Search Query": "Search Query",
+  "Time Period": "Time Period",
+  "Search": "Search",
+  "Clear Filters": "Clear Filters",
+  "No matching log entries found.": "No matching log entries found."
+}
