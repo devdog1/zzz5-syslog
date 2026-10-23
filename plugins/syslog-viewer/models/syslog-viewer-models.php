@@ -21,7 +21,7 @@ function syslog_viewer_get_directory() {
 
 /**
  * Validates and sanitizes a file path to prevent directory traversal.
- * Ensures the target file resides within the configured log directory or /var/log/.
+ * Respects the configured log directory strictly.
  */
 function syslog_viewer_sanitize_path($filename) {
     $baseDir = syslog_viewer_get_directory();
@@ -31,9 +31,17 @@ function syslog_viewer_sanitize_path($filename) {
 
     $fullPath = $baseDir . $filename;
 
-    // Fallback: If configured dir doesn't exist but /var/log does and file exists there
-    if (!file_exists($fullPath) && file_exists('/var/log/' . $filename)) {
-        $fullPath = '/var/log/' . $filename;
+    // If target file exists in user-defined directory, return it immediately
+    if (file_exists($fullPath)) {
+        return $fullPath;
+    }
+
+    // Fallback: If configured dir doesn't exist or file isn't there, check /var/log/syslog/ or /var/log/
+    $fallbacks = ['/var/log/syslog/' . $filename, '/var/log/' . $filename];
+    foreach ($fallbacks as $fallback) {
+        if (file_exists($fallback)) {
+            return $fallback;
+        }
     }
 
     return $fullPath;
@@ -41,12 +49,20 @@ function syslog_viewer_sanitize_path($filename) {
 
 /**
  * Scans configured syslog directory and retrieves available log files.
+ * Prioritizes the user-defined plugin setting directory.
  */
 function syslog_viewer_get_available_files() {
-    $dir = syslog_viewer_get_directory();
+    $configuredDir = syslog_viewer_get_directory();
     $files = [];
 
-    $scanDirs = array_unique([$dir, '/var/log/syslog/', '/var/log/']);
+    // Build scan list: configured dir first, then system fallbacks only if configured dir has no files or does not exist
+    $scanDirs = [$configuredDir];
+    if ($configuredDir !== '/var/log/syslog/') {
+        $scanDirs[] = '/var/log/syslog/';
+    }
+    if ($configuredDir !== '/var/log/' && $configuredDir !== '/var/log/syslog/') {
+        $scanDirs[] = '/var/log/';
+    }
 
     foreach ($scanDirs as $scanDir) {
         if (!is_dir($scanDir) || !is_readable($scanDir)) {
@@ -58,6 +74,7 @@ function syslog_viewer_get_available_files() {
             continue;
         }
 
+        $foundInThisDir = false;
         foreach ($items as $item) {
             if ($item === '.' || $item === '..') {
                 continue;
@@ -65,20 +82,25 @@ function syslog_viewer_get_available_files() {
 
             $path = $scanDir . $item;
             if (is_file($path) && is_readable($path)) {
-                // Avoid duplicating
                 if (!isset($files[$item])) {
                     $size = @filesize($path);
                     $mtime = @filemtime($path);
                     $files[$item] = [
-                        'filename'     => $item,
-                        'path'         => $path,
-                        'size'         => $size !== false ? $size : 0,
-                        'formatted_size' => syslog_viewer_format_bytes($size),
-                        'mtime'        => $mtime !== false ? $mtime : 0,
+                        'filename'        => $item,
+                        'path'            => $path,
+                        'size'            => $size !== false ? $size : 0,
+                        'formatted_size'  => syslog_viewer_format_bytes($size),
+                        'mtime'           => $mtime !== false ? $mtime : 0,
                         'mtime_formatted' => $mtime ? date('Y-m-d H:i:s', $mtime) : 'Unknown'
                     ];
+                    $foundInThisDir = true;
                 }
             }
+        }
+
+        // If files were successfully found in the user-configured directory, don't mix other directories
+        if ($foundInThisDir && $scanDir === $configuredDir) {
+            break;
         }
     }
 
