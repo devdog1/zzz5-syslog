@@ -197,6 +197,7 @@
         },
 
         buildRowHtml: function(line) {
+            var self = this;
             var sevClass = 'severity-' + (line.severity || 'info');
             var procText = line.process ? line.process + (line.pid ? '[' + line.pid + ']' : '') : 'system';
             var hostText = line.host || 'unknown';

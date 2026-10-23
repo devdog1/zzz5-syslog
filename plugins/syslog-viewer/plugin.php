@@ -25,59 +25,53 @@ if (function_exists('enqueue_script')) {
     enqueue_script('syslog-viewer-js', 'plugins/syslog-viewer/assets/js/syslog-viewer.js', ['jquery'], '1.0.0', true);
 }
 
-// Navigation Menu Items
-add_filter('theme_nav_links', function($links) {
-    if (!function_exists('has_permission') || has_permission('syslog_viewer_view')) {
-        $links[] = [
-            'id'       => 'syslog-viewer-menu',
-            'title'    => __('Syslog Viewer', 'syslog-viewer'),
-            'icon'     => 'fas fa-terminal',
-            'href'     => 'index.php?route=syslog_viewer_live',
-            'children' => [
-                [
-                    'title'  => __('Live Viewer', 'syslog-viewer'),
-                    'icon'   => 'fas fa-play',
-                    'href'   => 'index.php?route=syslog_viewer_live',
-                    'parent' => 'syslog-viewer-menu'
-                ],
-                [
-                    'title'  => __('Log Search', 'syslog-viewer'),
-                    'icon'   => 'fas fa-search',
-                    'href'   => 'index.php?route=syslog_viewer_search',
-                    'parent' => 'syslog-viewer-menu'
-                ],
-                [
-                    'title'  => __('Settings', 'syslog-viewer'),
-                    'icon'   => 'fas fa-cog',
-                    'href'   => 'index.php?route=syslog_viewer_settings',
-                    'parent' => 'syslog-viewer-menu'
-                ]
-            ]
-        ];
-    }
-    return $links;
-}, 10);
+/* =========================================================
+ * NAVIGATION MENU LINKS FILTER
+ * ========================================================= */
 
-// Register Custom Routes
+add_filter('theme_nav_links', function($nav) {
+    if (function_exists('has_permission') && !has_permission('syslog_viewer_view')) {
+        return $nav;
+    }
+
+    $syslog_menu = [
+        'label' => 'Syslog Viewer',
+        'icon'  => 'fa-solid fa-terminal',
+        'route' => 'syslog_viewer_live',
+        'children' => [
+            ['label' => 'Live Viewer', 'icon' => 'fa-solid fa-play', 'route' => 'syslog_viewer_live'],
+        ]
+    ];
+
+    if (!function_exists('has_permission') || has_permission('syslog_viewer_search')) {
+        $syslog_menu['children'][] = ['label' => 'Log Search', 'icon' => 'fa-solid fa-magnifying-glass', 'route' => 'syslog_viewer_search'];
+    }
+
+    if (!function_exists('has_permission') || has_permission('syslog_viewer_settings') || has_permission('manage_settings')) {
+        $syslog_menu['children'][] = ['label' => 'Settings', 'icon' => 'fa-solid fa-gears', 'route' => 'syslog_viewer_settings'];
+    }
+
+    $nav[] = $syslog_menu;
+    return $nav;
+});
+
+/* =========================================================
+ * ROUTE HANDLERS REGISTRATION
+ * ========================================================= */
+
 add_action('register_routes', function() {
     register_route('syslog_viewer_live', function() {
-        if (function_exists('has_permission') && !has_permission('syslog_viewer_view')) {
-            exit('Access Denied');
-        }
+        if (function_exists('has_permission') && !has_permission('syslog_viewer_view')) die('Access Denied');
         require_once __DIR__ . '/views/live-view.php';
     });
 
     register_route('syslog_viewer_search', function() {
-        if (function_exists('has_permission') && !has_permission('syslog_viewer_search')) {
-            exit('Access Denied');
-        }
+        if (function_exists('has_permission') && !has_permission('syslog_viewer_search')) die('Access Denied');
         require_once __DIR__ . '/views/search-view.php';
     });
 
     register_route('syslog_viewer_settings', function() {
-        if (function_exists('has_permission') && !has_permission('syslog_viewer_settings')) {
-            exit('Access Denied');
-        }
+        if (function_exists('has_permission') && !has_permission('syslog_viewer_settings') && !has_permission('manage_settings')) die('Access Denied');
         require_once __DIR__ . '/views/settings-view.php';
     });
 });
